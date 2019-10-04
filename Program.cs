@@ -14,6 +14,7 @@ namespace ICENoticeBot
     {
         public static void Main(string[] args)
         {
+            NoticeCrawler noticeCrawler = new NoticeCrawler();
             CreateWebHostBuilder(args).Build().Run();
         }
 
