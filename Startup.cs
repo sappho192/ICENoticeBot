@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
+using ICENoticeBot.Core;
+using ICENoticeBot.Util;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -15,9 +20,47 @@ namespace ICENoticeBot
 {
     public class Startup
     {
+        public static readonly NoticeCrawler noticeCrawler = new NoticeCrawler();
+
+        private static readonly HttpClient client = new HttpClient();
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            noticeCrawler.OnNoticeUpdated += NoticeCrawler_OnNoticeUpdated;
+        }
+
+        private void NoticeCrawler_OnNoticeUpdated(object sender, int recentDB, int recentWeb)
+        {
+            int articlesCount = recentWeb - recentDB;
+            for(int i = 0; i < articlesCount; i++)
+            {
+                var recentNoticeHeader = noticeCrawler.articleList[recentDB + i];
+                string message = $"{recentNoticeHeader.Date}%0A*{recentNoticeHeader.Title}*%0A첨부파일{(recentNoticeHeader.HasAttachment ? "있음" : "없음")}%0A[링크](http://dept.inha.ac.kr{Regex.Replace(recentNoticeHeader.Url, "\\&", "%26")})";
+
+                // Using my own things
+                string botKey = "EMPTY";
+                string chatId = "EMPTY";
+                string messageUrl = $"https://api.telegram.org/{botKey}/sendMessage?text={message}&parse_mode=markdown&chat_id={chatId}";
+                var response = Synchronizer.RunSync(new Func<Task<string>>
+                    (async () => await VisitAsync(messageUrl)));
+                Console.WriteLine($"Message response: {response}");
+            }
+        }
+
+        private async Task<string> VisitAsync(string url)
+        {
+            return await client.GetStringAsync(url);
+        }
+
+        private void InitHttpClient()
+        {
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("*/*"));
+            client.DefaultRequestHeaders.Add("User-Agent", "PostmanRuntime/7.17.1");
+            client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+            client.DefaultRequestHeaders.Add("Host", "dept.inha.ac.kr");
+            client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
         }
 
         public IConfiguration Configuration { get; }

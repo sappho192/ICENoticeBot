@@ -10,29 +10,19 @@ using System.Threading.Tasks;
 using System.Web;
 using HtmlAgilityPack;
 using ICENoticeBot.Model;
+using ICENoticeBot.Util;
 using Newtonsoft.Json;
 
-namespace ICENoticeBot
+namespace ICENoticeBot.Core
 {
-    public class NoticeCrawler
-    {
-        private static readonly TaskFactory _myTaskFactory = new TaskFactory(CancellationToken.None, TaskCreationOptions.None, TaskContinuationOptions.None, TaskScheduler.Default);
-        public static T RunSync<T>(Func<Task<T>> func)
-        {
-            CultureInfo cultureUi = CultureInfo.CurrentUICulture;
-            CultureInfo culture = CultureInfo.CurrentCulture;
-            return _myTaskFactory.StartNew<Task<T>>(delegate
-            {
-                Thread.CurrentThread.CurrentCulture = culture;
-                Thread.CurrentThread.CurrentUICulture = cultureUi;
-                return func();
-            }).Unwrap<T>().GetAwaiter().GetResult();
-        }
+    public class NoticeCrawler : NoticeUpdatedEvent
+    { 
+        public event NoticeUpdatedEventHandler OnNoticeUpdated;
 
         private readonly Timer crawlTimer;
         private static readonly HttpClient client = new HttpClient();
 
-        private SortedList<int, ArticleHeader> articleList;
+        public SortedList<int, ArticleHeader> articleList;
         //= new SortedList<int, ArticleHeader>(Comparer<int>.Create((x, y) => y.CompareTo(x)));
 
         public NoticeCrawler()
@@ -40,7 +30,7 @@ namespace ICENoticeBot
             InitHttpClient();
             InitNoticeDB();
             const int PERIOD = 60*1000; // 1 minute
-            crawlTimer = new Timer(RefreshNotice, null, 0, PERIOD);
+            crawlTimer = new Timer(RefreshNotice, null, 10*1000, PERIOD);
         }
 
         private void InitNoticeDB()
@@ -53,7 +43,7 @@ namespace ICENoticeBot
             }
             else
             {
-                CheckNoticeUpdates();
+                //CheckNoticeUpdates();
             }
         }
 
@@ -70,12 +60,17 @@ namespace ICENoticeBot
         private void UpdateNoticeList()
         {
             var recentDB = articleList.Last().Key;
+            int recentWeb = 0;
             int currentWeb = 0;
 
             int pageNum = 1;
             while (true)
             {
                 var headers = GatherSingleNoticePage(pageNum);
+                if(pageNum == 1)
+                {
+                    recentWeb = headers.First().Index;
+                }
                 foreach(var header in headers)
                 {
                     currentWeb = header.Index;
@@ -92,6 +87,7 @@ namespace ICENoticeBot
                 }
                 pageNum++;
             }
+            OnNoticeUpdated?.Invoke(this, recentDB, recentWeb);
         }
 
         private bool NoticeUpdated()
@@ -127,7 +123,7 @@ namespace ICENoticeBot
             List<ArticleHeader> headers = new List<ArticleHeader>();
 
             string url = @"http://dept.inha.ac.kr/user/indexSub.do?codyMenuSeq=6669&siteId=ice&dum=dum&boardId=5396814&page=";
-            string page = RunSync(new Func<Task<string>>
+            string page = Synchronizer.RunSync(new Func<Task<string>>
                 (async () => await VisitAsync($"{url}{pageNum}")));
             HtmlDocument pageHtml = new HtmlDocument();
             pageHtml.LoadHtml(page);

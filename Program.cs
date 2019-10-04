@@ -7,6 +7,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using ICENoticeBot.Core;
 
 namespace ICENoticeBot
 {
@@ -14,7 +15,6 @@ namespace ICENoticeBot
     {
         public static void Main(string[] args)
         {
-            NoticeCrawler noticeCrawler = new NoticeCrawler();
             CreateWebHostBuilder(args).Build().Run();
         }
 
