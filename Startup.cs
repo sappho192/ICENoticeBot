@@ -44,8 +44,8 @@ namespace ICENoticeBot
             int articlesCount = recentWeb - recentDB;
             for(int i = 0; i < articlesCount; i++)
             {
-                string message = $"{recentNoticeHeader.Date}%0A*{recentNoticeHeader.Title}*%0A첨부파일{(recentNoticeHeader.HasAttachment ? "있음" : "없음")}%0A[링크](http://dept.inha.ac.kr{Regex.Replace(recentNoticeHeader.Url, "\\&", "%26")})";
                 var recentNoticeHeader = Globals.articleList[recentDB + i];
+                string message = $"*{recentNoticeHeader.Index}. {recentNoticeHeader.Title}*%0A{recentNoticeHeader.Date}{(recentNoticeHeader.HasAttachment ? " (첨부파일 있음) " : " ")}[공지 링크](http://dept.inha.ac.kr{Regex.Replace(recentNoticeHeader.Url, "\\&", "%26")})";
 
                 // From TelegramSettings.json
                 string APIKey = Configuration["APIKey"];
