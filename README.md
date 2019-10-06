@@ -52,7 +52,7 @@ root
 └── /Model
     └── ArticleHeader.cs: 공지사항의 내용을 제외한 정보(제목, 작성일, 첨부파일 존재여부 등)를 담는 클래스
 └── /Controllers
-    └── ValuesController.cs: 웹 요청을 처리하는 클래스
+    └── ValuesController.cs: 웹 요청을 처리하는 클래스 (미사용중)
 └── /Util
     ├── Synchronizer.cs: 비동기 메소드를 동기로 실행하게 도와주는 클래스 (웹페이지 요청 용도)
     └── UniqueQueue.cs: 중복 삽입이 금지된 Queue 자료구조 (메시지 저장 및 처리 용도)
