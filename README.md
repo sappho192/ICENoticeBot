@@ -7,7 +7,7 @@
 * 문서 요약: ASP.Net Core에 기반한 텔레그램 챗봇입니다. 인하대학교 정보통신공학과 졸업프로젝트 공지사항 정보를 제공합니다.
 
 ## 제공하는 기능
-체크 되어 있지 않으면 예정사항입니다.
+**체크 되어 있지 않으면 예정사항입니다.**
 
 - [x] 새로운 공지사항이 있을 시 사용자에게 알림
 - [ ] 공지사항 목록을 보여줌
@@ -16,7 +16,7 @@
 
 ## 개발 환경
 * 언어: C#, HTML, JSON
-* 프레임워크: ASP.Net Core 2.1.* *SDK* [다운로드](https://dotnet.microsoft.com/download/dotnet-core/2.1)
+* 프레임워크: ASP.Net Core 2.1.* **SDK** [다운로드](https://dotnet.microsoft.com/download/dotnet-core/2.1)
 * 버전 관리: Git
 * 통신 규격: HTTP(REST 통신)
 * 개발 툴: Visual Studio 또는 Visual Studio Code [다운로드](https://visualstudio.microsoft.com/ko/downloads/)
@@ -26,7 +26,7 @@
 * Newtonsoft.Json : JSON 데이터 처리
 
 ## 실행 환경
-* Dotnet Core 2.1 *런타임* [다운로드](https://dotnet.microsoft.com/download/dotnet-core/2.1)
+* Dotnet Core 2.1 **런타임** [다운로드](https://dotnet.microsoft.com/download/dotnet-core/2.1)
 * 위의 런타임을 설치할 수 있는 운영 체제
 
 # 프로젝트 코드 구조
