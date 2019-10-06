@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web;
 using HtmlAgilityPack;
 using ICENoticeBot.Model;
+using ICENoticeBot.Properties;
 using ICENoticeBot.Util;
 using Newtonsoft.Json;
 
@@ -22,7 +23,6 @@ namespace ICENoticeBot.Core
         private readonly Timer crawlTimer;
         private static readonly HttpClient client = new HttpClient();
 
-        public SortedList<int, ArticleHeader> articleList;
         //= new SortedList<int, ArticleHeader>(Comparer<int>.Create((x, y) => y.CompareTo(x)));
 
         public NoticeCrawler()
@@ -41,7 +41,7 @@ namespace ICENoticeBot.Core
         {
             if (!LoadNoticeDB())
             {
-                articleList = new SortedList<int, ArticleHeader>();
+                Globals.articleList = new SortedList<int, ArticleHeader>();
                 GatherAllNotices();
                 SaveNoticeDB();
             }
@@ -63,7 +63,7 @@ namespace ICENoticeBot.Core
 
         private void UpdateNoticeList()
         {
-            var recentDB = articleList.Last().Key;
+            var recentDB = Globals.articleList.Last().Key;
             int recentWeb = 0;
             int currentWeb = 0;
 
@@ -83,7 +83,7 @@ namespace ICENoticeBot.Core
                         break;
                     }
 
-                    articleList.Add(header.Index, header);
+                    Globals.articleList.Add(header.Index, header);
                 }
                 if (currentWeb == recentDB)
                 {
@@ -96,7 +96,7 @@ namespace ICENoticeBot.Core
 
         private bool NoticeUpdated()
         {
-            var recentDB = articleList.Last().Key;
+            var recentDB = Globals.articleList.Last().Key;
             var recentWeb = GatherSingleNoticePage(1).First().Index;
             return recentWeb != recentDB;
         }
@@ -111,7 +111,7 @@ namespace ICENoticeBot.Core
                 {
                     foreach (var header in headers)
                     {
-                        articleList.Add(header.Index, header);
+                        Globals.articleList.Add(header.Index, header);
                     }
                     pageNum++;
                 }
@@ -199,13 +199,13 @@ namespace ICENoticeBot.Core
 
         private void SaveNoticeDB()
         {
-            if (articleList.Count > 0)
+            if (Globals.articleList.Count > 0)
             {
                 JsonSerializer serializer = new JsonSerializer();
                 using (StreamWriter sw = new StreamWriter(Properties.Constants.NOTICE_HEADERS_PATH))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
-                    serializer.Serialize(writer, articleList);
+                    serializer.Serialize(writer, Globals.articleList);
                     Console.WriteLine($"Saved notice db into '{Properties.Constants.NOTICE_HEADERS_PATH}'");
                 }
             }
@@ -234,7 +234,7 @@ namespace ICENoticeBot.Core
                 using (StreamReader sr = new StreamReader(Properties.Constants.NOTICE_HEADERS_PATH))
                 using (JsonReader reader = new JsonTextReader(sr))
                 {
-                    articleList = serializer.Deserialize<SortedList<int, ArticleHeader>>(reader);
+                    Globals.articleList = serializer.Deserialize<SortedList<int, ArticleHeader>>(reader);
                     Console.WriteLine($"Loaded notice db from '{Properties.Constants.NOTICE_HEADERS_PATH}'");
                     return true;
                 }
