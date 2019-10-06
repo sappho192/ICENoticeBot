@@ -338,5 +338,9 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# macOS temporary file
 .DS_Store
+
+# Program-generated file
 articles.txt
