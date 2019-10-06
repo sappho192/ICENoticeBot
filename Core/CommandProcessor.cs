@@ -30,33 +30,33 @@ namespace ICENoticeBot.Core
 
         private string ExecuteCommand(int messageID, int userID, string command)
         {
-            string result;
             switch (command)
             {
                 case "sub":
-                    if(UserManager.Instance().Add(userID))
-                    {
-                        result = @"공지사항이 새로 올라오면 알려드릴게요.";
-                    } else
-                    {
-                        result = @"이미 알림 목록에 계셔요.";
-                    }
-                    break;
+                    return Subscribe(userID);
                 case "unsub":
-                    if (UserManager.Instance().Remove(userID))
-                    {
-                        result = @"이제 알려드리지 않을거에요.";
-                    }
-                    else
-                    {
-                        result = @"이미 알림 목록에 없으셔요.";
-                    }
-                    break;
+                    return Unsubscribe(userID);
                 default:
-                    result = @"그런 명령은 없어요.";
-                    break;
+                    return @"그런 명령은 없어요.";
             }
-            return result;
+        }
+
+        private string Subscribe(int userID)
+        {
+            if (UserManager.Instance().Add(userID))
+            {
+                return @"공지사항이 새로 올라오면 알려드릴게요.";
+            }
+            return @"이미 알림 목록에 계셔요.";
+        }
+
+        private string Unsubscribe(int userID)
+        {
+            if (UserManager.Instance().Remove(userID))
+            {
+                return @"이제 알려드리지 않을거에요.";
+            }
+            return @"이미 알림 목록에 없으셔요.";
         }
     }
 }
