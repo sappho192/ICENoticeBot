@@ -19,6 +19,8 @@ namespace ICENoticeBot.Core
         private static readonly HttpClient client = new HttpClient(handler);
         private static UniqueQueue<JToken> commandsList = new UniqueQueue<JToken>();
 
+        private readonly CommandProcessor commandProcessor = new CommandProcessor();
+
         private static int lastUpdateId;
 
         public CommandReceiver()
@@ -69,29 +71,10 @@ namespace ICENoticeBot.Core
                 var messageID = message.Value<int>("message_id");
                 var userID = message.Value<JObject>("chat").Value<int>("id");
                 var text = message.Value<string>("text");
-                ProcessCommand(messageID, userID, text);
-            }
-        }
 
-        private void ProcessCommand(int messageID, int userID, string text)
-        {
-            string APIKey = Properties.Constants.CONFIGURATION["APIKey"];
-
-            if (text.IndexOf('/') == 0)
-            {// Command
-                string command = text.Substring(1);
-                string answerText = $"You requested {command}";
-                string answerUrl =
-                    $"https://api.telegram.org/{APIKey}/sendMessage?chat_id={userID}&reply_to_message_id={messageID}&text={answerText}";
+                string answerUrl = commandProcessor.Process(messageID, userID, text);
                 string response = Synchronizer.RunSync(new Func<Task<string>>
-                    (async () => await VisitAsync(answerUrl)));
-            } else
-            {// Message
-                string answerText = $"You said {text}";
-                string answerUrl =
-                    $"https://api.telegram.org/{APIKey}/sendMessage?chat_id={userID}&reply_to_message_id={messageID}&text={answerText}";
-                string response = Synchronizer.RunSync(new Func<Task<string>>
-                    (async () => await VisitAsync(answerUrl)));
+                        (async () => await VisitAsync(answerUrl)));
             }
         }
 
