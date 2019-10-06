@@ -20,7 +20,8 @@ namespace ICENoticeBot
 {
     public class Startup
     {
-        public static readonly NoticeCrawler noticeCrawler = new NoticeCrawler();
+        public readonly NoticeCrawler noticeCrawler;
+        public readonly CommandReceiver commandReceiver;
 
         private static readonly HttpClientHandler handler = new HttpClientHandler();
         private static readonly HttpClient client = new HttpClient(handler);
@@ -28,7 +29,12 @@ namespace ICENoticeBot
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            Properties.Constants.CONFIGURATION = configuration;
+
             InitHttpClient();
+            noticeCrawler = new NoticeCrawler();
+            commandReceiver = new CommandReceiver();
+
             noticeCrawler.OnNoticeUpdated += NoticeCrawler_OnNoticeUpdated;
         }
 
@@ -41,13 +47,13 @@ namespace ICENoticeBot
                 string message = $"{recentNoticeHeader.Date}%0A*{recentNoticeHeader.Title}*%0A첨부파일{(recentNoticeHeader.HasAttachment ? "있음" : "없음")}%0A[링크](http://dept.inha.ac.kr{Regex.Replace(recentNoticeHeader.Url, "\\&", "%26")})";
 
                 // From TelegramSettings.json
-                string botKey = Configuration["APIKey"];
+                string APIKey = Configuration["APIKey"];
 
                 // To all subscribed users
                 foreach (int userID in UserManager.Instance().Get())
                 {
                     //string chatId = UserManager.Instance().Get().First().ToString();
-                    string messageUrl = $"https://api.telegram.org/{botKey}/sendMessage?text={message}&parse_mode=markdown&chat_id={userID.ToString()}";
+                    string messageUrl = $"https://api.telegram.org/{APIKey}/sendMessage?text={message}&parse_mode=markdown&chat_id={userID.ToString()}";
                     var response = Synchronizer.RunSync(new Func<Task<string>>
                         (async () => await VisitAsync(messageUrl)));
                     Console.WriteLine($"Message response: {response}");
