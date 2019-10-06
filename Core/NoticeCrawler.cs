@@ -19,6 +19,7 @@ namespace ICENoticeBot.Core
     { 
         public event NoticeUpdatedEventHandler OnNoticeUpdated;
 
+        
         private readonly Timer crawlTimer;
         private static readonly HttpClient client = new HttpClient();
 
@@ -122,7 +123,7 @@ namespace ICENoticeBot.Core
         {
             List<ArticleHeader> headers = new List<ArticleHeader>();
 
-            string url = @"http://dept.inha.ac.kr/user/indexSub.do?codyMenuSeq=6669&siteId=ice&dum=dum&boardId=5396814&page=";
+            string url = Properties.Constants.NOTICE_URL;
             string page = Synchronizer.RunSync(new Func<Task<string>>
                 (async () => await VisitAsync($"{url}{pageNum}")));
             HtmlDocument pageHtml = new HtmlDocument();
@@ -198,11 +199,11 @@ namespace ICENoticeBot.Core
             if (articleList.Count > 0)
             {
                 JsonSerializer serializer = new JsonSerializer();
-                using (StreamWriter sw = new StreamWriter(@"articles.txt"))
+                using (StreamWriter sw = new StreamWriter(Properties.Constants.NOTICE_HEADERS_PATH))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     serializer.Serialize(writer, articleList);
-                    Console.WriteLine("Saved notice db into 'articles.txt'");
+                    Console.WriteLine($"Saved notice db into '{Properties.Constants.NOTICE_HEADERS_PATH}'");
                 }
             }
         }
@@ -224,14 +225,14 @@ namespace ICENoticeBot.Core
 
         private bool LoadNoticeDB()
         {
-            if (File.Exists("articles.txt"))
+            if (File.Exists(Properties.Constants.NOTICE_HEADERS_PATH))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                using (StreamReader sr = new StreamReader(@"articles.txt"))
+                using (StreamReader sr = new StreamReader(Properties.Constants.NOTICE_HEADERS_PATH))
                 using (JsonReader reader = new JsonTextReader(sr))
                 {
                     articleList = serializer.Deserialize<SortedList<int, ArticleHeader>>(reader);
-                    Console.WriteLine("Loaded notice db from 'articles.txt'");
+                    Console.WriteLine($"Loaded notice db from '{Properties.Constants.NOTICE_HEADERS_PATH}'");
                     return true;
                 }
             }

@@ -24,12 +24,12 @@ namespace ICENoticeBot
                 {
                     // YOU SHOULD MAKE YOUR OWN TelegramSettings.json FILE
                     // CHECK TelegramSettings.DEFAULT.json FILE
-                    if(!File.Exists("TelegramSettings.json")) {
+                    if(!File.Exists(Properties.Constants.TELEGRAM_SETTINGS_PATH)) {
                         throw new Exception(
-                            "YOU SHOULD MAKE YOUR OWN TelegramSettings.json FILE\n" +
-                            "CHECK TelegramSettings.DEFAULT.json FILE");
+                            $"YOU SHOULD MAKE YOUR OWN {Properties.Constants.TELEGRAM_SETTINGS_PATH} FILE\n" +
+                            $"CHECK {Properties.Constants.TELEGRAM_SETTINGS_DEFAULT_PATH} FILE");
                     }
-                    config.AddJsonFile("TelegramSettings.json");
+                    config.AddJsonFile(Properties.Constants.TELEGRAM_SETTINGS_PATH);
                 })
                 .UseStartup<Startup>();
     }
