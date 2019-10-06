@@ -43,13 +43,15 @@ namespace ICENoticeBot
                 // From TelegramSettings.json
                 string botKey = Configuration["APIKey"];
 
-                // TODO: notice for all subscribed users
-                string chatId = UserManager.Instance().Get().First().ToString();
-
-                string messageUrl = $"https://api.telegram.org/{botKey}/sendMessage?text={message}&parse_mode=markdown&chat_id={chatId}";
-                var response = Synchronizer.RunSync(new Func<Task<string>>
-                    (async () => await VisitAsync(messageUrl)));
-                Console.WriteLine($"Message response: {response}");
+                // To all subscribed users
+                foreach (int userID in UserManager.Instance().Get())
+                {
+                    //string chatId = UserManager.Instance().Get().First().ToString();
+                    string messageUrl = $"https://api.telegram.org/{botKey}/sendMessage?text={message}&parse_mode=markdown&chat_id={userID.ToString()}";
+                    var response = Synchronizer.RunSync(new Func<Task<string>>
+                        (async () => await VisitAsync(messageUrl)));
+                    Console.WriteLine($"Message response: {response}");
+                }
             }
         }
 
