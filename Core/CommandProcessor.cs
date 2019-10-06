@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Text;
+using System.Text.RegularExpressions;
+using ICENoticeBot.Properties;
+
 namespace ICENoticeBot.Core
 {
     public class CommandProcessor
@@ -24,21 +28,77 @@ namespace ICENoticeBot.Core
                 answerText = $"명령어는 / 로 시작해요.";
             }
 
-            answerUrl = $"https://api.telegram.org/{APIKey}/sendMessage?chat_id={userID}&reply_to_message_id={messageID}&text={answerText}";
+            answerUrl = $"https://api.telegram.org/{APIKey}/sendMessage?chat_id={userID}&parse_mode=markdown&reply_to_message_id={messageID}&text={answerText}";
             return answerUrl;
         }
 
         private string ExecuteCommand(int messageID, int userID, string command)
         {
-            switch (command)
+            string[] commands = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string mainCommand = commands[0];
+            switch (mainCommand)
             {
                 case "sub":
                     return Subscribe(userID);
                 case "unsub":
                     return Unsubscribe(userID);
+                case "list":
+                    return List(commands);
                 default:
-                    return @"그런 명령은 없어요.";
+                    return $"{command} 이런 명령은 없어요.";
             }
+        }
+
+        private string List(string[] commands)
+        {
+            if (Globals.articleList.Count == 0)
+            {
+                return "공지사항이 전부 날아갔다구요?";
+            }
+
+            int idx = 1;
+            if (commands.Length > 1)
+            {
+                if (!int.TryParse(commands[1], out idx))
+                {
+                    return $"{commands[1]}는 숫자가 아니네요.";
+                }
+            }
+            // (records + recordsPerPage - 1) / recordsPerPage;
+            int groupSize = (Globals.articleList.Count + Constants.NOTICE_SUBLIST_COUNT - 1) / Constants.NOTICE_SUBLIST_COUNT;
+            if (idx > groupSize) // Over the bound
+            {
+                idx = groupSize;
+            }
+
+            /* if Sublist size is 5, then
+             * ex1)
+             * list count: 13, idx: 4
+             * => idx: 3 (groupSize)
+             * => begin: (list count - (idx - 1) * 5) - 1 = 2
+             * => end: begin - 5 = -3 => 1
+             * 
+             * ex2)
+             * list count: 13, idx: 2
+             * => begin: (list count - (idx - 1) * 5) - 1 = 7
+             * => end: (begin - 5) + 1 = 3
+             */
+            int begin = (Globals.articleList.Count - ((idx - 1) * Constants.NOTICE_SUBLIST_COUNT)) - 1;
+            int end = begin - Constants.NOTICE_SUBLIST_COUNT + 1;
+            end = end > 0 ? end : 1;
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = begin; i >= end; i--)
+            {
+                builder.Append($"*{Globals.articleList[i].Index}. {Globals.articleList[i].Title}*%0A({Globals.articleList[i].Date})");
+                if (Globals.articleList[i].HasAttachment) {
+                    builder.Append(" (첨부있음)");
+                }
+                string link = $"http://dept.inha.ac.kr{Regex.Replace(Globals.articleList[i].Url, "\\&", "%26")}";
+                builder.Append($" [공지 링크]({link})%0A%0A");
+            }
+
+            return builder.ToString();
         }
 
         private string Subscribe(int userID)

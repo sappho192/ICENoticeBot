@@ -21,5 +21,7 @@ namespace ICENoticeBot.Properties
         public const int COMMAND_REFRESH_PERIOD = 2 * 1000; // 2 second
         public const int COMMAND_READ_DUETIME = 6 * 1000;
         public const int COMMAND_READ_PERIOD = 1 * 1000; // 1 second
+
+        public const int NOTICE_SUBLIST_COUNT = 5;
     }
 }
