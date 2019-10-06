@@ -79,15 +79,15 @@ namespace ICENoticeBot.Core
              * ex1)
              * list count: 13, idx: 4
              * => idx: 3 (groupSize)
-             * => begin: (list count - (idx - 1) * 5) - 1 = 2
+             * => begin: (list count - (idx - 1) * 5) = 3
              * => end: begin - 5 = -3 => 1
              * 
              * ex2)
              * list count: 13, idx: 2
-             * => begin: (list count - (idx - 1) * 5) - 1 = 7
-             * => end: (begin - 5) + 1 = 3
+             * => begin: (list count - (idx - 1) * 5) = 8
+             * => end: (begin - 5) + 1 = 4
              */
-            int begin = (Globals.articleList.Count - ((idx - 1) * Constants.NOTICE_SUBLIST_COUNT)) - 1;
+            int begin = (Globals.articleList.Count - ((idx - 1) * Constants.NOTICE_SUBLIST_COUNT));
             int end = begin - Constants.NOTICE_SUBLIST_COUNT + 1;
             end = end > 0 ? end : 1;
 
