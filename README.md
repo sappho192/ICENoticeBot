@@ -44,7 +44,8 @@ root
 ├── /Properties
 │   └── Constants.cs: 전역으로 이용하는 문자열 등의 값들을 모아놓은 클래스
 └── /Core
-    ├── CommandReceiver.cs: 공지사항 정보를 수집하는 클래스
+    ├── CommandProcessor.cs: 수신된 사용자 메시지를 처리하는 클래스
+    ├── CommandReceiver.cs: 사용자 메시지를 수신하는 클래스 
     ├── NoticeCrawler.cs: 공지사항 정보를 수집하는 클래스
     ├── NoticeUpdatedEvent.cs: 새로운 공지사항이 있을 때 이를 알려주는 이벤트 클래스
     └── UserManager.cs: 새로운 공지사항이 있을때 알림을 받기로 한 사용자들을 관리하는 클래스
