@@ -27,6 +27,7 @@ namespace ICENoticeBot
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            InitHttpClient();
             noticeCrawler.OnNoticeUpdated += NoticeCrawler_OnNoticeUpdated;
         }
 
