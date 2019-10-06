@@ -345,6 +345,7 @@ healthchecksdb
 # Program-generated file
 noticeHeaders.json
 subscribedUsers.json
+lastUpdateId.json
 
 # Program-required custom file
 TelegramSettings.json
