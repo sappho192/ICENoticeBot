@@ -92,6 +92,7 @@ namespace ICENoticeBot.Core
             end = end > 0 ? end : 1;
 
             StringBuilder builder = new StringBuilder();
+            builder.Append($"[{idx}번째 목록]%0A");
             for (int i = begin; i >= end; i--)
             {
                 builder.Append($"*{Globals.articleList[i].Index}. {Globals.articleList[i].Title}*%0A({Globals.articleList[i].Date})");
