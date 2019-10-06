@@ -62,6 +62,57 @@ namespace ICENoticeBot.Core
             }
         }
 
+        private string Files(string[] commands)
+        {
+            if (Globals.articleList.Count == 0)
+            {
+                return "공지사항이 전부 날아갔다구요?";
+            }
+
+            if (commands.Length == 1)
+            {
+                return $"글 번호가 필요해요. (예: /see {Globals.articleList.Last().Key})";
+            }
+
+            int idx = 1;
+            if (!int.TryParse(commands[1], out idx))
+            {
+                return $"{commands[1]}는 숫자가 아니네요.";
+            }
+            idx = Math.Clamp(idx, Globals.articleList.First().Value.Index, Globals.articleList.Last().Value.Index);
+
+            if (!Globals.articleList.ContainsKey(idx))
+            {
+                return $"{idx}번째 글이 없어요.";
+            }
+
+            if (!Globals.articleList[idx].HasAttachment)
+            {
+                return "첨부파일이 없는 걸로 기억해요.";
+            }
+
+            string url = $"http://dept.inha.ac.kr{Globals.articleList[idx].Url}";
+            string page = Synchronizer.RunSync(new Func<Task<string>>
+                (async () => await VisitAsync(url)));
+            HtmlDocument pageHtml = new HtmlDocument();
+            pageHtml.LoadHtml(page);
+
+            var boardNode = pageHtml.DocumentNode.SelectSingleNode(@"//*[@id=""board-container""]/div[2]/dl/dd[2]/div");
+            StringBuilder filesLinkBuilder = new StringBuilder();
+            foreach (var attachNode in boardNode.ChildNodes)
+            {
+                if (attachNode.Name.Equals("p"))
+                {
+                    var aNode = attachNode.Descendants("a").First();
+                    string link = $"http://dept.inha.ac.kr{Regex.Replace(aNode.Attributes["href"].Value, "\\&", "%26")}";
+                    string desc = Regex.Replace(aNode.InnerText, @"/r|/n|/t|&nbsp;|\s", "");
+                    filesLinkBuilder.Append($"-%20[{desc}]({link})%0A");
+                }
+            }
+
+            return filesLinkBuilder.ToString();
+        }
+
         private string See(string[] commands)
         {
             if (Globals.articleList.Count == 0)
@@ -103,8 +154,29 @@ namespace ICENoticeBot.Core
             content = Regex.Replace(content, @"<a.*>", "(링크 생략)");
             content = Regex.Replace(content, @"<.*?>|\r|\n|\t", ""); // Remove all remaining tags
             content = Regex.Replace(content, @" ", "%20");
+            StringBuilder resultBuilder = new StringBuilder();
+            resultBuilder.Append(content);
 
-            return content;
+            if (Globals.articleList[idx].HasAttachment)
+            {
+                var filesNode = pageHtml.DocumentNode.SelectSingleNode(@"//*[@id=""board-container""]/div[2]/dl/dd[2]/div");
+                StringBuilder filesLinkBuilder = new StringBuilder();
+                foreach (var attachNode in filesNode.ChildNodes)
+                {
+                    if (attachNode.Name.Equals("p"))
+                    {
+                        var aNode = attachNode.Descendants("a").First();
+                        //string link = $"http://dept.inha.ac.kr{Regex.Replace(aNode.Attributes["href"].Value, "\\&", "%26")}";
+                        string desc = Regex.Replace(aNode.InnerText, @"/r|/n|/t|&nbsp;|\s", "");
+                        //filesLinkBuilder.Append($"-%20[{desc}]({link})%0A");
+                        filesLinkBuilder.Append($"%0A-%20{desc}");
+                    }
+                }
+                resultBuilder.Append(filesLinkBuilder.ToString());
+            }
+
+            resultBuilder.Append($"%0A[본문 링크]({Regex.Replace(url, "\\&", "%26")})");
+            return resultBuilder.ToString();
         }
 
         private string Start()
