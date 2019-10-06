@@ -21,7 +21,7 @@ namespace ICENoticeBot.Core
             }
             else
             {// Message
-                answerText = $"You said {text}";
+                answerText = $"명령어는 / 로 시작해요.";
             }
 
             answerUrl = $"https://api.telegram.org/{APIKey}/sendMessage?chat_id={userID}&reply_to_message_id={messageID}&text={answerText}";
@@ -53,7 +53,7 @@ namespace ICENoticeBot.Core
                     }
                     break;
                 default:
-                    result = @"그런 명령은 없습니다.";
+                    result = @"그런 명령은 없어요.";
                     break;
             }
             return result;
