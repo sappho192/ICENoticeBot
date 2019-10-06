@@ -8,5 +8,8 @@ namespace ICENoticeBot.Properties
         public const string SUB_USERS_PATH = @"subscribedUsers.json";
         public const string NOTICE_HEADERS_PATH = @"noticeHeaders.json";
         public const string NOTICE_URL = @"http://dept.inha.ac.kr/user/indexSub.do?codyMenuSeq=6669&siteId=ice&dum=dum&boardId=5396814&page=";
+
+        public const int NOTICE_REFRESH_DUETIME = 10 * 1000; // 10 seconds
+        public const int NOTICE_REFRESH_PERIOD = 60 * 1000; // 1 minute
     }
 }

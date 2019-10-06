@@ -19,7 +19,6 @@ namespace ICENoticeBot.Core
     { 
         public event NoticeUpdatedEventHandler OnNoticeUpdated;
 
-        
         private readonly Timer crawlTimer;
         private static readonly HttpClient client = new HttpClient();
 
@@ -30,8 +29,12 @@ namespace ICENoticeBot.Core
         {
             InitHttpClient();
             InitNoticeDB();
-            const int PERIOD = 60*1000; // 1 minute
-            crawlTimer = new Timer(RefreshNotice, null, 10*1000, PERIOD);
+
+            crawlTimer = new Timer(RefreshNotice, null,
+                // Timer will be started 10 seconds after the constructor
+                Properties.Constants.NOTICE_REFRESH_DUETIME,
+                // Timer will be repeated over 60 seconds
+                Properties.Constants.NOTICE_REFRESH_PERIOD);
         }
 
         private void InitNoticeDB()
