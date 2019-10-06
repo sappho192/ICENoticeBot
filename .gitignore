@@ -343,7 +343,9 @@ healthchecksdb
 .DS_Store
 
 # Program-generated file
-articles.txt
+noticeHeaders.json
+subscribedUsers.json
 
 # Program-required custom file
 TelegramSettings.json
+
