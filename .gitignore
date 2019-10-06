@@ -344,3 +344,6 @@ healthchecksdb
 
 # Program-generated file
 articles.txt
+
+# Program-required custom file
+TelegramSettings.json

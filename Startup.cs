@@ -38,8 +38,8 @@ namespace ICENoticeBot
                 var recentNoticeHeader = noticeCrawler.articleList[recentDB + i];
                 string message = $"{recentNoticeHeader.Date}%0A*{recentNoticeHeader.Title}*%0A첨부파일{(recentNoticeHeader.HasAttachment ? "있음" : "없음")}%0A[링크](http://dept.inha.ac.kr{Regex.Replace(recentNoticeHeader.Url, "\\&", "%26")})";
 
-                // Using my own things
-                string botKey = "EMPTY";
+                // From TelegramSettings.json
+                string botKey = Configuration["APIKey"];
                 string chatId = "EMPTY";
                 string messageUrl = $"https://api.telegram.org/{botKey}/sendMessage?text={message}&parse_mode=markdown&chat_id={chatId}";
                 var response = Synchronizer.RunSync(new Func<Task<string>>

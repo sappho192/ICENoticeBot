@@ -20,6 +20,17 @@ namespace ICENoticeBot
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    // YOU SHOULD MAKE YOUR OWN TelegramSettings.json FILE
+                    // CHECK TelegramSettings.DEFAULT.json FILE
+                    if(!File.Exists("TelegramSettings.json")) {
+                        throw new Exception(
+                            "YOU SHOULD MAKE YOUR OWN TelegramSettings.json FILE\n" +
+                            "CHECK TelegramSettings.DEFAULT.json FILE");
+                    }
+                    config.AddJsonFile("TelegramSettings.json");
+                })
                 .UseStartup<Startup>();
     }
 }
