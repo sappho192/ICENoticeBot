@@ -22,7 +22,8 @@ namespace ICENoticeBot
     {
         public static readonly NoticeCrawler noticeCrawler = new NoticeCrawler();
 
-        private static readonly HttpClient client = new HttpClient();
+        private static readonly HttpClientHandler handler = new HttpClientHandler();
+        private static readonly HttpClient client = new HttpClient(handler);
 
         public Startup(IConfiguration configuration)
         {
@@ -56,12 +57,16 @@ namespace ICENoticeBot
 
         private void InitHttpClient()
         {
+#if DEBUG
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+#endif
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("*/*"));
             client.DefaultRequestHeaders.Add("User-Agent", "PostmanRuntime/7.17.1");
             client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
             client.DefaultRequestHeaders.Add("Host", "dept.inha.ac.kr");
             client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+            
         }
 
         public IConfiguration Configuration { get; }
