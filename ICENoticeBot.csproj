@@ -21,4 +21,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="articles.txt" />
+  </ItemGroup>
 </Project>
