@@ -25,7 +25,7 @@ namespace ICENoticeBot.Core
             }
             else
             {// Message
-                answerText = $"명령어는 / 로 시작해요.";
+                answerText = $"*명령어는 / 로 시작해요.*%0A%0A{Constants.MANUAL}";
             }
 
             answerUrl = $"https://api.telegram.org/{APIKey}/sendMessage?chat_id={userID}&parse_mode=markdown&reply_to_message_id={messageID}&text={answerText}";
@@ -38,6 +38,8 @@ namespace ICENoticeBot.Core
             string mainCommand = commands[0];
             switch (mainCommand)
             {
+                case "start":
+                    return Start();
                 case "sub":
                     return Subscribe(userID);
                 case "unsub":
@@ -47,6 +49,11 @@ namespace ICENoticeBot.Core
                 default:
                     return $"{command} 이런 명령은 없어요.";
             }
+        }
+
+        private string Start()
+        {
+            return Constants.MANUAL;
         }
 
         private string List(string[] commands)
