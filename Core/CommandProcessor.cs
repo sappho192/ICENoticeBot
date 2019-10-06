@@ -1,14 +1,23 @@
 ﻿using System;
+using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using HtmlAgilityPack;
 using ICENoticeBot.Properties;
+using ICENoticeBot.Util;
 
 namespace ICENoticeBot.Core
 {
     public class CommandProcessor
     {
+        private static readonly HttpClientHandler handler = new HttpClientHandler();
+        private static readonly HttpClient client = new HttpClient(handler);
+
         public CommandProcessor()
         {
+            InitHttpClient();
         }
 
         public string Process(int messageID, int userID, string text)
@@ -46,9 +55,56 @@ namespace ICENoticeBot.Core
                     return Unsubscribe(userID);
                 case "list":
                     return List(commands);
+                case "see":
+                    return See(commands);
                 default:
                     return $"{command} 이런 명령은 없어요.";
             }
+        }
+
+        private string See(string[] commands)
+        {
+            if (Globals.articleList.Count == 0)
+            {
+                return "공지사항이 전부 날아갔다구요?";
+            }
+
+            if (commands.Length == 1)
+            {
+                return $"글 번호가 필요해요. (예: /see {Globals.articleList.Last().Key})";
+            }
+
+            int idx = 1;
+            if (!int.TryParse(commands[1], out idx))
+            {
+                return $"{commands[1]}는 숫자가 아니네요.";
+            }
+            idx = Math.Clamp(idx, Globals.articleList.First().Value.Index, Globals.articleList.Last().Value.Index);
+
+            if (!Globals.articleList.ContainsKey(idx))
+            {
+                return $"{idx}번째 글이 없어요.";
+            }
+
+            string url = $"http://dept.inha.ac.kr{Globals.articleList[idx].Url}";
+            string page = Synchronizer.RunSync(new Func<Task<string>>
+                (async () => await VisitAsync(url)));
+            HtmlDocument pageHtml = new HtmlDocument();
+            pageHtml.LoadHtml(page);
+
+            var boardNode = pageHtml.DocumentNode.SelectSingleNode(@"//*[@id=""divView""]");
+            var content = boardNode.InnerHtml;
+            content = Regex.Replace(content, @"&nbsp;", "");
+            content = Regex.Replace(content, @"\*|_", "");
+            content = Regex.Replace(content, @"<strong>|<\/strong>", "*");
+            content = Regex.Replace(content, @"<\/p>|<br>", "%0A");
+            content = Regex.Replace(content, @"<i>|<\/i>", "_");
+            content = Regex.Replace(content, @"<img.*?>", "(이미지 생략)");
+            content = Regex.Replace(content, @"<a.*>", "(링크 생략)");
+            content = Regex.Replace(content, @"<.*?>|\r|\n|\t", ""); // Remove all remaining tags
+            content = Regex.Replace(content, @" ", "%20");
+
+            return content;
         }
 
         private string Start()
@@ -129,6 +185,25 @@ namespace ICENoticeBot.Core
                 return @"이제 알려드리지 않을거에요.";
             }
             return @"이미 알림 목록에 없으셔요.";
+        }
+
+        private async Task<string> VisitAsync(string url)
+        {
+            return await client.GetStringAsync(url);
+        }
+
+        private void InitHttpClient()
+        {
+#if DEBUG
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+#endif
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("*/*"));
+            client.DefaultRequestHeaders.Add("User-Agent", "PostmanRuntime/7.17.1");
+            client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+            client.DefaultRequestHeaders.Add("Host", "dept.inha.ac.kr");
+            client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+
         }
     }
 }

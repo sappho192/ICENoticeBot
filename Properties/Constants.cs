@@ -27,7 +27,8 @@ namespace ICENoticeBot.Properties
 
         public static readonly string MANUAL = new StringBuilder()
             .Append($"*인하대 정보통신 프로젝트 공지 알림봇*%0A")
-            .Append($"/list - 공지사항 요약을 5개 단위로 보여줍니다(n번째 목록: /list n)%0A")
+            .Append($"/list - 공지사항 목록을 5개씩 보여줍니다(n번째 목록: /list n)%0A")
+            .Append($"/see n - n번째 공지를 보여줍니다.%0A")
             .Append($"/sub - 새로운 공지사항 알림을 받습니다%0A")
             .Append($"/unsub - 공지사항 알림을 더이상 받지 않습니다%0A")
             .Append("기능 문의: @sappho192").ToString();
