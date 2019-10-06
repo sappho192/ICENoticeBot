@@ -70,6 +70,10 @@ namespace ICENoticeBot.Core
             {
                 idx = groupSize;
             }
+            if (idx < 1) // Under the bound
+            {
+                idx = 1;
+            }
 
             /* if Sublist size is 5, then
              * ex1)
