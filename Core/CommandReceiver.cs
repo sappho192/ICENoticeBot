@@ -88,28 +88,35 @@ namespace ICENoticeBot.Core
             }
 
             //Console.WriteLine($"Offset: {lastUpdateId} Request URL: {url}");
-            string response = Synchronizer.RunSync(new Func<Task<string>>
-                (async () => await VisitAsync(url)));
-            var responseJson = JObject.Parse(response);
-            if (responseJson.Value<bool>("ok"))
+            try
             {
-                var Commands = responseJson["result"] as JArray;
-                //Console.WriteLine($"{Commands.Count} results");
-                foreach (JObject command in Commands)
+                string response = Synchronizer.RunSync(new Func<Task<string>>
+                    (async () => await VisitAsync(url)));
+                var responseJson = JObject.Parse(response);
+                if (responseJson.Value<bool>("ok"))
                 {
-                    //Console.WriteLine($"Received command: {command}");
-                    int offset = command.Value<int>("update_id");
+                    var Commands = responseJson["result"] as JArray;
+                    //Console.WriteLine($"{Commands.Count} results");
+                    foreach (JObject command in Commands)
+                    {
+                        //Console.WriteLine($"Received command: {command}");
+                        int offset = command.Value<int>("update_id");
 
-                    if(lastUpdateId == offset)
-                    {// already processed message and next loop can be update
-                        continue;
+                        if (lastUpdateId == offset)
+                        {// already processed message and next loop can be update
+                            continue;
+                        }
+                        lastUpdateId = offset;
+                        // update file too
+                        File.WriteAllText(Properties.Constants.LAST_UPDATE_ID, JsonConvert.SerializeObject(lastUpdateId));
+
+                        commandsList.Enqueue(command);
                     }
-                    lastUpdateId = offset;
-                    // update file too
-                    File.WriteAllText(Properties.Constants.LAST_UPDATE_ID, JsonConvert.SerializeObject(lastUpdateId));
-
-                    commandsList.Enqueue(command);
                 }
+            }
+            catch (HttpRequestException ex)
+            {//TODO: Will this resolve timeout exception?
+                Console.WriteLine($"Web visit failed with {ex.ToString()}");
             }
         }
 
