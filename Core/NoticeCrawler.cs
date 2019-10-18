@@ -63,7 +63,8 @@ namespace ICENoticeBot.Core
 
         private void UpdateNoticeList()
         {
-            var recentDB = Globals.articleList.Last().Key;
+            // Recent article number should be largest.
+            var recentDB = Globals.articleList.Keys.Max();
             int recentWeb = 0;
             int currentWeb = 0;
 
